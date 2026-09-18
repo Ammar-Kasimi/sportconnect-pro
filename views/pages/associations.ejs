@@ -1,0 +1,22 @@
+<main class="container">
+    <h1>Associations Partenaires</h1>
+    
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nom du Club</th>
+                <th>Email de Contact</th>
+                <th>Téléphone</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% clubs.forEach(function(club) { %>
+                <tr>
+                    <td><strong><%= club.name %></strong></td>
+                    <td><a href="mailto:<%= club.contact_email %>"><%= club.contact_email %></a></td>
+                    <td><%= club.phone %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</main>
