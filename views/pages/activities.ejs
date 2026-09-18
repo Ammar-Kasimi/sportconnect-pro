@@ -1,0 +1,32 @@
+<main class="container">
+    <h1>Catalogue des Activités</h1>
+    
+    <div class="actions">
+        <a href="/activities/new" class="button">Créer un nouveau cours</a>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Activité</th>
+                <th>Club (Association)</th>
+                <th>Lieu (Salle)</th>
+                <th>Jour & Horaire</th>
+                <th>Capacité</th>
+                <th>Tarif de base</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% activities.forEach(function(activity) { %>
+                <tr>
+                    <td><strong><%= activity.name %></strong></td>
+                    <td><%= activity.club_name %></td>
+                    <td><%= activity.facility_name %></td>
+                    <td><%= activity.day_of_week %> (<%= activity.start_time %> - <%= activity.end_time %>)</td>
+                    <td><%= activity.max_capacity %> places</td>
+                    <td><%= activity.base_price %> €</td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</main>

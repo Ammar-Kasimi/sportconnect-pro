@@ -1,0 +1,67 @@
+<main class="container">
+    <h1>Planifier une nouvelle activité</h1>
+    
+    <form action="/activities" method="POST">
+        <div>
+            <label>Nom de l'activité (ex: Judo U11)</label>
+            <input type="text" name="name" required>
+        </div>
+
+        <div>
+            <label>Club Organisateur</label>
+            <select name="association_id" required>
+                <option value="">-- Sélectionnez un club --</option>
+                <% clubs.forEach(function(club) { %>
+                    <option value="<%= club.id %>"><%= club.name %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div>
+            <label>Infrastructure (Salle)</label>
+            <select name="facility_id" required>
+                <option value="">-- Sélectionnez une salle --</option>
+                <% facilities.forEach(function(facility) { %>
+                    <option value="<%= facility.id %>">
+                        <%= facility.name %> (Max ERP: <%= facility.erp_capacity %>)
+                    </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div>
+            <label>Jour de la semaine</label>
+            <select name="day_of_week" required>
+                <option value="Lundi">Lundi</option>
+                <option value="Mardi">Mardi</option>
+                <option value="Mercredi">Mercredi</option>
+                <option value="Jeudi">Jeudi</option>
+                <option value="Vendredi">Vendredi</option>
+                <option value="Samedi">Samedi</option>
+                <option value="Dimanche">Dimanche</option>
+            </select>
+        </div>
+
+        <div>
+            <label>Heure de début</label>
+            <input type="time" name="start_time" required>
+        </div>
+
+        <div>
+            <label>Heure de fin</label>
+            <input type="time" name="end_time" required>
+        </div>
+
+        <div>
+            <label>Capacité maximale (inscrits)</label>
+            <input type="number" name="max_capacity" required>
+        </div>
+
+        <div>
+            <label>Tarif de base annuel (€)</label>
+            <input type="number" step="0.01" name="base_price" required>
+        </div>
+
+        <button type="submit">Enregistrer l'activité</button>
+    </form>
+</main>

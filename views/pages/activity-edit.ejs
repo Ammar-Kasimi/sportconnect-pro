@@ -1,0 +1,64 @@
+<!-- views/pages/activity-edit.ejs -->
+<main class="container">
+    <h1>Modifier l'activité : <%= activity.name %></h1>
+    
+    <form action="/activities/<%= activity.id %>/edit" method="POST">
+        <div>
+            <label>Nom de l'activité</label>
+            <input type="text" name="name" value="<%= activity.name %>" required>
+        </div>
+
+        <div>
+            <label>Club Organisateur</label>
+            <select name="association_id" required>
+                <% clubs.forEach(function(club) { %>
+                    <option value="<%= club.id %>" <%= club.id === activity.association_id ? 'selected' : '' %>>
+                        <%= club.name %>
+                    </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div>
+            <label>Infrastructure (Salle)</label>
+            <select name="facility_id" required>
+                <% facilities.forEach(function(facility) { %>
+                    <option value="<%= facility.id %>" <%= facility.id === activity.facility_id ? 'selected' : '' %>>
+                        <%= facility.name %> (Max ERP: <%= facility.erp_capacity %>)
+                    </option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div>
+            <label>Jour de la semaine</label>
+            <select name="day_of_week" required>
+                <% ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].forEach(function(day) { %>
+                    <option value="<%= day %>" <%= day === activity.day_of_week ? 'selected' : '' %>><%= day %></option>
+                <% }); %>
+            </select>
+        </div>
+
+        <div>
+            <label>Heure de début</label>
+            <input type="time" name="start_time" value="<%= activity.start_time %>" required>
+        </div>
+
+        <div>
+            <label>Heure de fin</label>
+            <input type="time" name="end_time" value="<%= activity.end_time %>" required>
+        </div>
+
+        <div>
+            <label>Capacité maximale (inscrits)</label>
+            <input type="number" name="max_capacity" value="<%= activity.max_capacity %>" required>
+        </div>
+
+        <div>
+            <label>Tarif de base annuel (€)</label>
+            <input type="number" step="0.01" name="base_price" value="<%= activity.base_price %>" required>
+        </div>
+
+        <button type="submit">Mettre à jour l'activité</button>
+    </form>
+</main>

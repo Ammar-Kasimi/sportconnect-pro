@@ -4,7 +4,8 @@ const ejs = require('ejs');
 function render(res, viewName, data = {}, statusCode = 200) {
     const filePath = path.join(__dirname, '..', '..', 'view', 'pages', '${viewName}.ejs')
 
-    ejs.renderFile(filePath, data, (err, html) => {
+    ejs.renderFi
+    le(filePath, data, (err, html) => {
         if (err) {
             console.error('Erreur lors du rendu EJS :', err);
             res.writeHead(500, { 'Content-Type': 'text/html; charset=utf-8' });
