@@ -1,0 +1,103 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-4xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">Devis d'Inscription</h1>
+    <p class="text-slate-500 mt-1">Vérification de l'éligibilité et calcul tarifaire municipal.</p>
+</div>
+
+<div class="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+    
+    <!-- Récapitulatif Adhérent & Activité -->
+    <div class="space-y-6">
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">Adhérent</h2>
+            <div class="space-y-2 text-sm text-slate-600">
+                <p><span class="font-semibold text-slate-700">Nom :</span> <%= member.first_name %> <%= member.last_name %></p>
+                <p><span class="font-semibold text-slate-700">Résident :</span> <%= member.is_resident ? 'Oui (Tarif de base)' : 'Non (+35% de majoration)' %></p>
+                <p><span class="font-semibold text-slate-700">Foyer Fiscal (QF) :</span> <%= member.quotient_familial ? member.quotient_familial + ' €' : 'Non renseigné' %></p>
+                <p><span class="font-semibold text-slate-700">Inscriptions Fratrie :</span> <%= existingFamilyRegistrations %> existante(s)</p>
+                <p><span class="font-semibold text-slate-700">Pass'Sport :</span> <%= member.pass_sport_code ? 'Oui (-50 €)' : 'Non' %></p>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-3 mb-4">Activité Sélectionnée</h2>
+            <div class="space-y-2 text-sm text-slate-600">
+                <p><span class="font-semibold text-slate-700">Cours :</span> <%= activity.name %></p>
+                <p><span class="font-semibold text-slate-700">Tarif de base annuel :</span> <%= activity.base_price %> €</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calcul Tarifaire & Échéancier -->
+    <div class="space-y-6">
+        <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-lg text-white">
+            <h2 class="text-lg font-bold text-indigo-400 border-b border-slate-700 pb-3 mb-4">Calcul du Montant Final</h2>
+            
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-slate-300">Tarif initial club</span>
+                <span class="font-mono"><%= pricingDetails.basePrice.toFixed(2) %> €</span>
+            </div>
+
+            <div class="py-4 border-t border-slate-700 flex justify-between items-center">
+                <span class="text-lg font-bold">Total à régler</span>
+                <span class="text-3xl font-extrabold text-emerald-400"><%= pricingDetails.finalPrice.toFixed(2) %> €</span>
+            </div>
+            <% if (pricingDetails.finalPrice === 15) { %>
+                <p class="text-xs text-slate-400 text-right mt-1">* Plancher d'assurance fédérale appliqué</p>
+            <% } %>
+        </div>
+
+        <!-- Échéancier de paiement en 3 fois -->
+        <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-4">Échéancier proposé (3x sans frais)</h2>
+            <ul class="space-y-3">
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-600">Aujourd'hui (40%)</span>
+                    <span class="font-bold text-slate-800"><%= pricingDetails.installments.payment1.toFixed(2) %> €</span>
+                </li>
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-600">J+30 (30%)</span>
+                    <span class="font-bold text-slate-800"><%= pricingDetails.installments.payment2.toFixed(2) %> €</span>
+                </li>
+                <li class="flex justify-between text-sm">
+                    <span class="text-slate-600">J+60 (30%)</span>
+                    <span class="font-bold text-slate-800"><%= pricingDetails.installments.payment3.toFixed(2) %> €</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Formulaire de validation final (Pour le Jour 7) -->
+        <!-- Formulaire de validation final -->
+        <form action="/registrations" method="POST" class="mt-6">
+            <input type="hidden" name="member_id" value="<%= member.id %>">
+            <input type="hidden" name="activity_id" value="<%= activity.id %>">
+            
+            <!-- NB: Never trust the final_price from the frontend in production, 
+                 we re-calculate it in the controller anyway. -->
+            
+            <div class="mb-5 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                <label class="block text-sm font-bold text-slate-800 mb-3">Modalité de paiement à l'inscription :</label>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="payment_plan" value="single" checked class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                        <span class="text-sm text-slate-700">Comptant (1x)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="payment_plan" value="three_times" class="w-4 h-4 text-indigo-600 border-slate-300 focus:ring-indigo-500">
+                        <span class="text-sm text-slate-700">En 3 fois sans frais</span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold text-lg transition shadow-md flex justify-center items-center gap-2">
+                Confirmer l'inscription
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+            </button>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

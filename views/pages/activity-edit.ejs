@@ -1,64 +1,72 @@
-<!-- views/pages/activity-edit.ejs -->
-<main class="container">
-    <h1>Modifier l'activité : <%= activity.name %></h1>
-    
-    <form action="/activities/<%= activity.id %>/edit" method="POST">
-        <div>
-            <label>Nom de l'activité</label>
-            <input type="text" name="name" value="<%= activity.name %>" required>
+<%- include('../partials/header') %><main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="bg-white rounded-xl shadow-sm ring-1 ring-slate-200 p-8">
+        <div class="mb-8 border-b border-slate-100 pb-5">
+            <h1 class="text-2xl font-bold text-slate-900">Modifier : <span class="text-indigo-600"><%= activity.name %></span></h1>
+            <p class="mt-1 text-sm text-slate-500">Mettez à jour les informations de ce créneau sportif.</p>
         </div>
+        
+        <form action="/activities/<%= activity.id %>/edit" method="POST" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Nom de l'activité</label>
+                <input type="text" name="name" value="<%= activity.name %>" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+            </div>
 
-        <div>
-            <label>Club Organisateur</label>
-            <select name="association_id" required>
-                <% clubs.forEach(function(club) { %>
-                    <option value="<%= club.id %>" <%= club.id === activity.association_id ? 'selected' : '' %>>
-                        <%= club.name %>
-                    </option>
-                <% }); %>
-            </select>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Club Organisateur</label>
+                    <select name="association_id" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                        <% clubs.forEach(function(club) { %>
+                            <option value="<%= club.id %>" <%= club.id === activity.association_id ? 'selected' : '' %>><%= club.name %></option>
+                        <% }); %>
+                    </select>
+                </div>
 
-        <div>
-            <label>Infrastructure (Salle)</label>
-            <select name="facility_id" required>
-                <% facilities.forEach(function(facility) { %>
-                    <option value="<%= facility.id %>" <%= facility.id === activity.facility_id ? 'selected' : '' %>>
-                        <%= facility.name %> (Max ERP: <%= facility.erp_capacity %>)
-                    </option>
-                <% }); %>
-            </select>
-        </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Infrastructure (Salle)</label>
+                    <select name="facility_id" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                        <% facilities.forEach(function(facility) { %>
+                            <option value="<%= facility.id %>" <%= facility.id === activity.facility_id ? 'selected' : '' %>>
+                                <%= facility.name %> (Max: <%= facility.erp_capacity %>)
+                            </option>
+                        <% }); %>
+                    </select>
+                </div>
+            </div>
 
-        <div>
-            <label>Jour de la semaine</label>
-            <select name="day_of_week" required>
-                <% ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].forEach(function(day) { %>
-                    <option value="<%= day %>" <%= day === activity.day_of_week ? 'selected' : '' %>><%= day %></option>
-                <% }); %>
-            </select>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Jour</label>
+                    <select name="day_of_week" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 bg-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                        <% ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'].forEach(function(day) { %>
+                            <option value="<%= day %>" <%= day === activity.day_of_week ? 'selected' : '' %>><%= day %></option>
+                        <% }); %>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Heure de début</label>
+                    <input type="time" name="start_time" value="<%= activity.start_time %>" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Heure de fin</label>
+                    <input type="time" name="end_time" value="<%= activity.end_time %>" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+            </div>
 
-        <div>
-            <label>Heure de début</label>
-            <input type="time" name="start_time" value="<%= activity.start_time %>" required>
-        </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pb-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Capacité maximale</label>
+                    <input type="number" name="max_capacity" value="<%= activity.max_capacity %>" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Tarif de base annuel (€)</label>
+                    <input type="number" step="0.01" name="base_price" value="<%= activity.base_price %>" required class="w-full rounded-md border border-slate-300 px-4 py-2 text-slate-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none transition-all">
+                </div>
+            </div>
 
-        <div>
-            <label>Heure de fin</label>
-            <input type="time" name="end_time" value="<%= activity.end_time %>" required>
-        </div>
-
-        <div>
-            <label>Capacité maximale (inscrits)</label>
-            <input type="number" name="max_capacity" value="<%= activity.max_capacity %>" required>
-        </div>
-
-        <div>
-            <label>Tarif de base annuel (€)</label>
-            <input type="number" step="0.01" name="base_price" value="<%= activity.base_price %>" required>
-        </div>
-
-        <button type="submit">Mettre à jour l'activité</button>
-    </form>
+            <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <a href="/activities" class="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors">Annuler</a>
+                <button type="submit" class="px-6 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">Mettre à jour</button>
+            </div>
+        </form>
+    </div>
 </main>

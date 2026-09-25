@@ -1,0 +1,27 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto text-center py-16">
+    <div class="inline-flex items-center justify-center h-24 w-24 rounded-full bg-slate-100 mb-6 shadow-sm border border-slate-200">
+        <span class="text-4xl font-extrabold text-slate-400"><%= statusCode %></span>
+    </div>
+    
+    <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-4">
+        <% if (statusCode === 404) { %>
+            Page introuvable
+        <% } else if (statusCode === 500) { %>
+            Erreur Interne du Serveur
+        <% } else { %>
+            Une erreur est survenue
+        <% } %>
+    </h1>
+    
+    <p class="text-lg text-slate-500 mb-8">
+        <%= message %>
+    </p>
+
+    <a href="/" class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 transition shadow-sm">
+        Retour au Tableau de Bord
+    </a>
+</div>
+
+<%- include('../partials/footer') %>

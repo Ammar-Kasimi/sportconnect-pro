@@ -1,20 +1,20 @@
 const pool = require('../config/db')
-const render =require ('../core/renderer')
+const { sendError,render } = require('../core/renderer')
 
-async function listFacilies(req,res) {
-    try{
-    const results= await pool.query('select * FROM facilities order by name asc')
-    const facilitiesList = results.rows;
-    render(res,'pages.ejs',{facilites,facilitiesList})
+async function listFacilities(req, res) {
+    try {
+        const results = await pool.query('select * FROM facilities order by name asc')
+        const facilitiesList = results.rows;
+        render(res, 'pages/facilities', { facilities: facilitiesList })
 
-}catch(error){
-    console.error('database error:',error)
-    res.statusCode =500
-res.end('Internal server error')
+    } catch (error) {
+        console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
+    }
 }
 
 function showCreateForm(req, res) {
-    render(res, 'pages/facility-form.ejs', {});
+    render(res, 'pages/facility-form.ejs', { facility: null });
 }
 
 async function createFacility(req, res) {
@@ -29,18 +29,18 @@ async function createFacility(req, res) {
         res.writeHead(302, { Location: '/facilities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
 async function showEditForm(req, res, params) {
     try {
         const result = await pool.query('SELECT * FROM facilities WHERE id = $1', [params.id]);
-        render(res, 'pages/facility-edit.ejs', { facility: result.rows[0] });
+        render(res, 'pages/facility-form.ejs', { facility: result.rows[0] });
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -56,8 +56,8 @@ async function updateFacility(req, res, params) {
         res.writeHead(302, { Location: '/facilities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -67,9 +67,10 @@ async function deleteFacility(req, res, params) {
         res.writeHead(302, { Location: '/facilities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
-module.exports = { listFacilities, showCreateForm, createFacility, showEditForm, updateFacility, deleteFacility };}
+
+module.exports = { listFacilities, showCreateForm, createFacility, showEditForm, updateFacility, deleteFacility }

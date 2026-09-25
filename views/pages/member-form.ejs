@@ -1,0 +1,69 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto bg-white p-8 rounded-xl border border-slate-200 shadow-sm">
+    <h2 class="text-xl font-bold text-slate-900 mb-6">
+        <%= member ? 'Modifier l\'Adhérent' : 'Ajouter un Nouvel Adhérent' %>
+    </h2>
+    
+    <!-- Dynamically switch action URL for Create vs Update -->
+    <form action="<%= member ? '/members/' + member.id : '/members' %>" method="POST" class="space-y-6">
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Prénom *</label>
+                <input type="text" name="first_name" value="<%= member ? member.first_name : '' %>" required class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Nom *</label>
+                <input type="text" name="last_name" value="<%= member ? member.last_name : '' %>" required class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Date de naissance *</label>
+                <input type="date" name="birth_date" value="<%= member ? member.birth_date : '' %>" required class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Date du Certificat Médical *</label>
+                <input type="date" name="medical_certificate_date" value="<%= member ? member.medical_certificate_date : '' %>" required class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Foyer Fiscal (Optionnel)</label>
+                <select name="family_id" class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+                    <option value="">-- Aucun foyer rattaché --</option>
+                    <% families.forEach(family => { %>
+                        <option value="<%= family.id %>" <%= member && member.family_id === family.id ? 'selected' : '' %>>
+                            <%= family.family_code %>
+                        </option>
+                    <% }) %>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-slate-700">Code Pass'Sport (Optionnel)</label>
+                <input type="text" name="pass_sport_code" value="<%= member ? member.pass_sport_code : '' %>" placeholder="Ex: 23-ABCD-4567" class="mt-1 block w-full rounded-md border-slate-300 border p-2 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm">
+            </div>
+        </div>
+
+        <div class="flex items-center mt-4">
+            <input type="checkbox" name="is_resident" id="is_resident" <%= (member && !member.is_resident) ? '' : 'checked' %> class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500">
+            <label for="is_resident" class="ml-2 block text-sm text-slate-700">
+                Résident métropolitain (bénéficie du tarif de base)
+            </label>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end gap-3">
+            <a href="/members" class="px-4 py-2 border border-slate-300 rounded-md text-sm font-medium text-slate-700 bg-white hover:bg-slate-50 transition">Annuler</a>
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md text-sm font-medium hover:bg-indigo-700 transition shadow-sm">
+                <%= member ? 'Mettre à jour' : 'Enregistrer l\'adhérent' %>
+            </button>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>

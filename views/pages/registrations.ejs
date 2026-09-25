@@ -1,0 +1,154 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-6xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">Suivi des Inscriptions</h1>
+    <p class="text-slate-500 mt-1">Gestion des places confirmées et de la file d'attente.</p>
+</div>
+
+<!-- Formulaire de Nouvelle Inscription -->
+<div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 mb-8">
+    <h2 class="text-lg font-bold text-slate-800 mb-4">Nouvelle Inscription</h2>
+    <form action="/checkout" method="GET" class="flex flex-col md:flex-row gap-4 items-end">
+        <div class="flex-1 w-full">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Adhérent</label>
+            <select name="member_id" class="w-full rounded-md border border-slate-300 px-3 py-2 bg-slate-50" required>
+                <option value="">-- Sélectionner un adhérent --</option>
+                <% allMembers.forEach(m => { %>
+                    <option value="<%= m.id %>"><%= m.last_name %> <%= m.first_name %></option>
+                <% }) %>
+            </select>
+        </div>
+
+        <div class="flex-1 w-full">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Activité</label>
+            <select name="activity_id" class="w-full rounded-md border border-slate-300 px-3 py-2 bg-slate-50" required>
+                <option value="">-- Sélectionner une activité --</option>
+                <% allActivities.forEach(a => { %>
+                    <option value="<%= a.id %>"><%= a.name %> (<%= a.base_price %> €)</option>
+                <% }) %>
+            </select>
+        </div>
+
+        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-md font-bold transition shadow-sm w-full md:w-auto">
+            Générer le devis
+        </button>
+    </form>
+</div>
+
+<div class="max-w-6xl mx-auto space-y-8">
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-emerald-50 border-b border-emerald-100 p-4">
+            <h2 class="font-bold text-emerald-800">Inscriptions Confirmées</h2>
+        </div>
+        <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                    <th class="px-6 py-3">Adhérent</th>
+                    <th class="px-6 py-3">Activité</th>
+                    <th class="px-6 py-3">Prix Final</th>
+                    <th class="px-6 py-3">Paiement</th> <!-- Nouveau header -->
+                    <th class="px-6 py-3">Statut</th>
+                    <th class="px-6 py-3 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                <% registrations.forEach(reg => { %>
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-6 py-4 font-medium text-slate-900">
+                            <%= reg.first_name %> <%= reg.last_name %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <%= reg.activity_name %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <%= reg.final_price %> €
+                        </td>
+                        <!-- Nouvelle Cellule de Paiement structurée -->
+                        <td class="px-6 py-4">
+                            <% if (reg.payment_plan === 'three_times') { %>
+                                <div class="flex items-center gap-3">
+                                    <span class="text-sm font-medium text-slate-700">
+                                        <%= reg.installments_paid %> / 3
+                                    </span>
+
+                                    <% if (reg.installments_paid < 3) { %>
+                                        <form action="/registrations/<%= reg.id %>/pay" method="POST" class="inline">
+                                            <button type="submit" class="px-3 py-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-md text-xs font-bold transition">
+                                                Encaisser
+                                            </button>
+                                        </form>
+                                    <% } else { %>
+                                        <span class="px-2 py-1 bg-slate-100 text-slate-500 rounded-md text-xs font-bold">Soldé</span>
+                                    <% } %>
+                                </div>
+                            <% } else { %>
+                                <span class="text-sm text-slate-500">Comptant</span>
+                            <% } %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-xs font-bold">Confirmé</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <form action="/registrations/<%= reg.id %>/cancel" method="POST" onsubmit="return confirm('Annuler cette inscription ? Cela libérera la place pour la file d\'attente.');">
+                                <button type="submit" class="text-red-600 hover:text-red-800 font-medium text-xs">Annuler</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }) %>
+                <% if (registrations.length === 0) { %>
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-slate-400">Aucune inscription confirmée.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="bg-amber-50 border-b border-amber-100 p-4">
+            <h2 class="font-bold text-amber-800">File d'Attente & Repêchages</h2>
+        </div>
+        <table class="w-full text-left text-sm text-slate-600">
+            <thead class="bg-slate-50 text-slate-500 uppercase text-xs">
+                <tr>
+                    <th class="px-6 py-3">Adhérent</th>
+                    <th class="px-6 py-3">Activité</th>
+                    <th class="px-6 py-3">Score Priorité</th>
+                    <th class="px-6 py-3">Statut</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                <% waitingList.forEach(wait => { %>
+                    <tr class="hover:bg-slate-50">
+                        <td class="px-6 py-4 font-medium text-slate-900">
+                            <%= wait.first_name %> <%= wait.last_name %>
+                        </td>
+                        <td class="px-6 py-4">
+                            <%= wait.activity_name %>
+                        </td>
+                        <td class="px-6 py-4 font-mono text-indigo-600">
+                            <%= wait.priority_score %> pts
+                        </td>
+                        <td class="px-6 py-4">
+                            <% if (wait.status === 'promoted_pending') { %>
+                                <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Repêché (en attente)</span>
+                                <div class="text-[10px] text-slate-400 mt-1">
+                                    Expire le: <%= new Date(wait.deadline_confirmation).toLocaleString('fr-FR') %>
+                                </div>
+                            <% } else { %>
+                                <span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-xs font-bold">En attente</span>
+                            <% } %>
+                        </td>
+                    </tr>
+                <% }) %>
+                <% if (waitingList.length === 0) { %>
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-slate-400">File d'attente vide.</td>
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

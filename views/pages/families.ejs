@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<div class="flex justify-between items-center mb-6">
+    <div>
+        <h1 class="text-2xl font-bold text-slate-900">Foyers Fiscaux</h1>
+        <p class="text-sm text-slate-500 mt-1">Gestion des familles et des quotients familiaux (QF).</p>
+    </div>
+    <a href="/families/new" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">
+        + Nouveau Foyer
+    </a>
+</div>
+
+<div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+    <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50">
+            <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Code Famille</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Quotient Familial (QF)</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-200 bg-white">
+            <% families.forEach(family => { %>
+                <tr class="hover:bg-slate-50 transition">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-900">
+                        <%= family.family_code %>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                        <%= family.quotient_familial %> €
+                    </td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+</div>
+
+<%- include('../partials/footer') %>

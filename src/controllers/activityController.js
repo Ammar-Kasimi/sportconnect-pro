@@ -1,6 +1,6 @@
 const pool = require('../config/db');
-const render = require('../core/renderer');
 const scheduleService = require('../services/scheduleService');
+const { sendError, render } = require('../core/renderer');
 
 async function listActivities(req, res) {
     try {
@@ -14,8 +14,8 @@ async function listActivities(req, res) {
         const result = await pool.query(queryText);
         render(res, 'pages/activities.ejs', { activities: result.rows });
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -25,49 +25,54 @@ async function showCreateForm(req, res) {
         const facilitiesResult = await pool.query('SELECT id, name, erp_capacity FROM facilities ORDER BY name');
         render(res, 'pages/activity-form.ejs', { clubs: clubsResult.rows, facilities: facilitiesResult.rows });
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
 async function createActivity(req, res) {
     try {
-        const { name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price } = req.body;
+        const { name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price, target_category } = req.body;
+        const isHighRisk = req.body.is_high_risk === 'on';
+        const safeTargetCategory = target_category || 'Tous publics';
         const capacity = parseInt(max_capacity, 10);
         const price = parseFloat(base_price);
         const subZone = sub_zone && sub_zone.trim() !== '' ? sub_zone.trim() : null;
 
-        const facilityRes = await pool.query('SELECT erp_capacity FROM facilities WHERE id = $1', [facility_id]);
-        
-        if (!scheduleService.validateCapacity(capacity, facilityRes.rows[0].erp_capacity)) {
+        const facilityRes = await pool.query('SELECT erp_capacity, is_divisible FROM facilities WHERE id = $1', [facility_id]);
+        const facility = facilityRes.rows[0];
+
+        if (!scheduleService.validateCapacity(capacity, facility.erp_capacity)) {
             res.statusCode = 400;
             return res.end("Erreur : Capacité ERP dépassée.");
         }
 
         const existingRes = await pool.query(
-            'SELECT start_time, end_time FROM activities WHERE facility_id = $1 AND day_of_week = $2',
+            'SELECT start_time, end_time, sub_zone, day_of_week FROM activities WHERE facility_id = $1 AND day_of_week = $2',
             [facility_id, day_of_week]
         );
 
+        const newActivity = { day_of_week, start_time, end_time, sub_zone: subZone };
+
         for (let i = 0; i < existingRes.rows.length; i++) {
             const existing = existingRes.rows[i];
-            if (scheduleService.hasTimeCollision(start_time, end_time, existing.start_time, existing.end_time)) {
+            if (scheduleService.isConflicting(newActivity, existing, facility)) {
                 res.statusCode = 400;
-                return res.end("Erreur : Conflit d'horaire détecté.");
+                return res.end("Erreur : Conflit d'horaire ou de sous-zone détecté.");
             }
         }
 
         const queryText = `
-            INSERT INTO activities (name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price) 
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            INSERT INTO activities (name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price, is_high_risk, target_category) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         `;
-        await pool.query(queryText, [name, association_id, facility_id, subZone, day_of_week, start_time, end_time, capacity, price]);
+        await pool.query(queryText, [name, association_id, facility_id, subZone, day_of_week, start_time, end_time, capacity, price, isHighRisk, safeTargetCategory]);
 
         res.writeHead(302, { Location: '/activities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -76,58 +81,63 @@ async function showEditForm(req, res, params) {
         const activityRes = await pool.query('SELECT * FROM activities WHERE id = $1', [params.id]);
         const clubsRes = await pool.query('SELECT id, name FROM associations ORDER BY name');
         const facilitiesRes = await pool.query('SELECT id, name, erp_capacity FROM facilities ORDER BY name');
-        
-        render(res, 'pages/activity-edit.ejs', { 
+
+        render(res, 'pages/activity-edit.ejs', {
             activity: activityRes.rows[0],
             clubs: clubsRes.rows,
             facilities: facilitiesRes.rows
         });
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
 async function updateActivity(req, res, params) {
     try {
-        const { name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price } = req.body;
+        const { name, association_id, facility_id, sub_zone, day_of_week, start_time, end_time, max_capacity, base_price, target_category } = req.body;
+        const isHighRisk = req.body.is_high_risk === 'on';
+        const safeTargetCategory = target_category || 'Tous publics';
         const capacity = parseInt(max_capacity, 10);
         const price = parseFloat(base_price);
         const subZone = sub_zone && sub_zone.trim() !== '' ? sub_zone.trim() : null;
 
-        const facilityRes = await pool.query('SELECT erp_capacity FROM facilities WHERE id = $1', [facility_id]);
-        
-        if (!scheduleService.validateCapacity(capacity, facilityRes.rows[0].erp_capacity)) {
+        const facilityRes = await pool.query('SELECT erp_capacity, is_divisible FROM facilities WHERE id = $1', [facility_id]);
+        const facility = facilityRes.rows[0];
+
+        if (!scheduleService.validateCapacity(capacity, facility.erp_capacity)) {
             res.statusCode = 400;
             return res.end("Erreur : Capacité ERP dépassée.");
         }
 
         const scheduleRes = await pool.query(
-            'SELECT start_time, end_time FROM activities WHERE facility_id = $1 AND day_of_week = $2 AND id != $3',
+            'SELECT start_time, end_time, sub_zone, day_of_week FROM activities WHERE facility_id = $1 AND day_of_week = $2 AND id != $3',
             [facility_id, day_of_week, params.id]
         );
-        
+
+        const newActivity = { day_of_week, start_time, end_time, sub_zone: subZone };
+
         for (let i = 0; i < scheduleRes.rows.length; i++) {
             const existing = scheduleRes.rows[i];
-            if (scheduleService.hasTimeCollision(start_time, end_time, existing.start_time, existing.end_time)) {
+            if (scheduleService.isConflicting(newActivity, existing, facility)) {
                 res.statusCode = 400;
-                return res.end("Erreur : Conflit d'horaire détecté.");
+                return res.end("Erreur : Conflit d'horaire ou de sous-zone détecté.");
             }
         }
 
         const queryText = `
             UPDATE activities 
             SET name = $1, association_id = $2, facility_id = $3, sub_zone = $4, day_of_week = $5, 
-                start_time = $6, end_time = $7, max_capacity = $8, base_price = $9
-            WHERE id = $10
+                start_time = $6, end_time = $7, max_capacity = $8, base_price = $9, is_high_risk = $10, target_category = $11
+            WHERE id = $12
         `;
-        await pool.query(queryText, [name, association_id, facility_id, subZone, day_of_week, start_time, end_time, capacity, price, params.id]);
-
+        await pool.query(queryText, [name, association_id, facility_id, subZone, day_of_week, start_time, end_time, capacity, price, isHighRisk, safeTargetCategory, params.id]);
+        
         res.writeHead(302, { Location: '/activities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -137,12 +147,12 @@ async function deleteActivity(req, res, params) {
         res.writeHead(302, { Location: '/activities' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+        return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
-module.exports = { 
-    listActivities, showCreateForm, createActivity, 
-    showEditForm, updateActivity, deleteActivity 
+module.exports = {
+    listActivities, showCreateForm, createActivity,
+    showEditForm, updateActivity, deleteActivity
 };

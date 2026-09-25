@@ -1,0 +1,77 @@
+<%- include('../partials/header') %>
+
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900">Registre des Adhérents</h1>
+            <p class="text-sm text-slate-500 mt-1">Gestion des inscrits, catégories d'âge et certificats médicaux.</p>
+        </div>
+        <a href="/members/new"
+            class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition shadow-sm">
+            + Nouvel Adhérent
+        </a>
+    </div>
+
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+        <table class="min-w-full divide-y divide-slate-200">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Identité</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Foyer
+                        Fiscal</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Catégorie Fédérale</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">Statut
+                        Médical</th>
+                    <th class="px-6 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Résident</th>
+                    <th class="px-6 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                        Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 bg-white">
+                <% members.forEach(member=> { %>
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-bold text-slate-900">
+                                <%= member.first_name %>
+                                    <%= member.last_name %>
+                            </div>
+                            <div class="text-xs text-slate-500">Né(e) le <%= new
+                                    Date(member.birth_date).toLocaleDateString('fr-FR') %>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-600">
+                            <%= member.family_code ? member.family_code : 'Individuel' %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span
+                                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <%= member.category %>
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <% if (member.medical_status==='compliant' ) { %>
+                                <span
+                                    class="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-200">Valide
+                                    (3 ans)</span>
+                                <% } else { %>
+                                    <span
+                                        class="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">Non
+                                        Conforme</span>
+                                    <% } %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                            <%= member.is_resident ? 'Oui' : 'Non' %>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <a href="/members/<%= member.id %>/edit"
+                                class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 px-3 py-1 rounded transition">Modifier</a>
+                        </td>
+                    </tr>
+                    <% }) %>
+            </tbody>
+        </table>
+    </div>
+
+    <%- include('../partials/footer') %>

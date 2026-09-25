@@ -1,9 +1,15 @@
 DROP TABLE IF EXISTS waiting_list;
+
 DROP TABLE IF EXISTS registrations;
+
 DROP TABLE IF EXISTS members;
+
 DROP TABLE IF EXISTS families;
+
 DROP TABLE IF EXISTS activities;
+
 DROP TABLE IF EXISTS associations;
+
 DROP TABLE IF EXISTS facilities;
 
 CREATE TABLE facilities (
@@ -23,13 +29,13 @@ CREATE TABLE associations (
 
 CREATE TABLE activities (
     id SERIAL PRIMARY KEY,
-    association_id INT REFERENCES associations(id),
-    facility_id INT REFERENCES facilities(id),
+    association_id INT REFERENCES associations (id),
+    facility_id INT REFERENCES facilities (id),
     sub_zone VARCHAR(50),
-    title VARCHAR(150) NOT NULL,
+    name VARCHAR(150) NOT NULL,
     base_price DECIMAL(10, 2) NOT NULL,
     max_capacity INT NOT NULL,
-    day_of_week INT NOT NULL,
+    day_of_week VARCHAR(20) NOT NULL,
     start_time TIME NOT NULL,
     end_time TIME NOT NULL,
     target_category VARCHAR(50) DEFAULT 'Tous publics',
@@ -44,7 +50,7 @@ CREATE TABLE families (
 
 CREATE TABLE members (
     id SERIAL PRIMARY KEY,
-    family_id INT REFERENCES families(id),
+    family_id INT REFERENCES families (id),
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     birth_date DATE NOT NULL,
@@ -55,18 +61,21 @@ CREATE TABLE members (
 
 CREATE TABLE registrations (
     id SERIAL PRIMARY KEY,
-    member_id INT REFERENCES members(id),
-    activity_id INT REFERENCES activities(id),
+    member_id INT REFERENCES members (id),
+    activity_id INT REFERENCES activities (id),
     final_price DECIMAL(10, 2) NOT NULL,
     payment_plan VARCHAR(20) DEFAULT 'single',
     status VARCHAR(30) DEFAULT 'confirmed'
 );
 
+DROP TABLE IF EXISTS waiting_list;
+
 CREATE TABLE waiting_list (
     id SERIAL PRIMARY KEY,
-    activity_id INT REFERENCES activities(id),
-    member_id INT REFERENCES members(id),
+    activity_id INT REFERENCES activities (id),
+    member_id INT REFERENCES members (id),
     priority_score INT DEFAULT 0,
     status VARCHAR(30) DEFAULT 'waiting',
-    deadline_confirmation TIMESTAMP
+    deadline_confirmation TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );

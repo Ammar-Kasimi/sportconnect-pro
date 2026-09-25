@@ -1,18 +1,17 @@
 const pool = require('../config/db');
-const render = require('../core/renderer');
+const { sendError,render } = require('../core/renderer')
 
 async function listAssociations(req, res) {
     try {
         const result = await pool.query('select * from associations order by name')
-        render(res, 'pages/associations.ejs', { clubs: result })
+        render(res, 'pages/associations.ejs', { clubs: result.rows })
     } catch (error) {
-        console.error('database error', error)
-        res.statusCode = 500;
-        res.end('internal server Error')
+       console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 function showCreateForm(req, res) {
-    render(res, 'pages/association-form.ejs', {});
+    render(res, 'pages/association-form.ejs', {club:null});
 }
 
 async function createAssociation(req, res) {
@@ -25,18 +24,18 @@ async function createAssociation(req, res) {
         res.writeHead(302, { Location: '/associations' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
 async function showEditForm(req, res, params) {
     try {
         const result = await pool.query('SELECT * FROM associations WHERE id = $1', [params.id]);
-        render(res, 'pages/association-edit.ejs', { club: result.rows[0] });
+        render(res, 'pages/association-form.ejs', { club: result.rows[0] });
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -50,8 +49,8 @@ async function updateAssociation(req, res, params) {
         res.writeHead(302, { Location: '/associations' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 
@@ -61,8 +60,8 @@ async function deleteAssociation(req, res, params) {
         res.writeHead(302, { Location: '/associations' });
         res.end();
     } catch (error) {
-        res.statusCode = 500;
-        res.end("Internal Server Error");
+        console.error('Database error:', error);
+    return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
 module.exports = { listAssociations, showCreateForm, createAssociation, showEditForm, updateAssociation, deleteAssociation };

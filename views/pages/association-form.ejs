@@ -1,0 +1,43 @@
+<%- include('../partials/header') %>
+
+<div class="max-w-2xl mx-auto mb-8">
+    <h1 class="text-3xl font-bold text-slate-900">
+        <%= locals.club ? 'Modifier l\'Association' : 'Nouvelle Association' %>
+    </h1>
+    <p class="text-slate-500 mt-1">Remplissez les informations du club sportif.</p>
+</div>
+
+<div class="max-w-2xl mx-auto bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <form action="<%= locals.club ? '/associations/' + club.id + '/edit' : '/associations' %>" method="POST" class="space-y-6">
+        
+        <div>
+            <label for="name" class="block text-sm font-medium text-slate-700 mb-1">Nom de l'Association</label>
+            <input type="text" id="name" name="name" required
+                value="<%= locals.club ? club.name : '' %>"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+        </div>
+
+        <div>
+            <label for="contact_email" class="block text-sm font-medium text-slate-700 mb-1">Email de Contact</label>
+            <input type="email" id="contact_email" name="contact_email" required
+                value="<%= locals.club ? club.contact_email : '' %>"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+        </div>
+
+        <div>
+            <label for="phone" class="block text-sm font-medium text-slate-700 mb-1">Téléphone</label>
+            <input type="tel" id="phone" name="phone"
+                value="<%= locals.club ? club.phone : '' %>"
+                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none">
+        </div>
+
+        <div class="flex justify-end pt-4 border-t border-slate-100">
+            <a href="/associations" class="px-6 py-2 text-slate-600 hover:bg-slate-50 rounded-lg font-medium mr-2">Annuler</a>
+            <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">
+                <%= locals.club ? 'Mettre à jour' : 'Enregistrer' %>
+            </button>
+        </div>
+    </form>
+</div>
+
+<%- include('../partials/footer') %>
