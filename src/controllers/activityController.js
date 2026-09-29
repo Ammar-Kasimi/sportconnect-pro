@@ -132,7 +132,7 @@ async function updateActivity(req, res, params) {
             WHERE id = $12
         `;
         await pool.query(queryText, [name, association_id, facility_id, subZone, day_of_week, start_time, end_time, capacity, price, isHighRisk, safeTargetCategory, params.id]);
-        
+
         res.writeHead(302, { Location: '/activities' });
         res.end();
     } catch (error) {
@@ -151,7 +151,36 @@ async function deleteActivity(req, res, params) {
         return sendError(res, 500, "Une erreur interne est survenue. Veuillez réessayer ultérieurement.");
     }
 }
+async function getActivity(req, res, id) {
+    try {
+        let activity = await pool.query('select * from activities where id =$1', [id])
+        // res.writeHead(200,{Location:'/activities'});
 
+        // res.end()
+        res.writeHead(200, { location: '/activities-form', accept: text / json })
+        res.end
+        return res.json(stringify(activity))
+    } catch (err) {
+        console.error('database error:', error)
+        return sendError(res, 500, "une errer 500")
+    }
+}
+let arr = []
+arr.map
+async function getStats(req, res, parmas) {
+    try {
+        let results = await pool.query('select activities.nom,activities.max_capacity,count(registrations.*) as registrations from activities join registrations on activities.id = registrations.activity_id')
+        // let results=await pool.query('select nom,max_capacity from activities')
+        results = results.rows
+        let newResults = results.map((e) => { return { activity: e.activity, capacity: parseInt(e.max_capacity), registered: parseInt(e.registrations), fillRate: parseInt(e.max_capacity) / parseInt(e.registrations) * 100 } })
+        render(res,'pages/stats',{stats:newResults})
+
+    }
+    catch(err){
+        console.error('database Error',err)
+        return sendError(res,500,'erreur en database')
+    }
+}
 module.exports = {
     listActivities, showCreateForm, createActivity,
     showEditForm, updateActivity, deleteActivity

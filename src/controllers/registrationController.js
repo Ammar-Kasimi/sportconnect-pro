@@ -287,6 +287,22 @@ async function listRegistrations(req, res) {
     }
 }
 
+async function register(res,req,params){
+    let client= await pool.connect()
+    try{
+     await client.query('BEGIN');
+
+    let capacity= await client.query('select max_capacity from activities where id = $1',[params.id]);le
+     let reg_count=await client.query('select count(*) from registrations where activity_id=$1',[params.id])
+      
+     
+
+     await client.query('COMMIT')
+    }catch(err){
+        await client.query('ROLLBACK')
+    }
+
+}
 module.exports = {
     prepareCheckout,
     createRegistration,

@@ -78,4 +78,8 @@ router.on('GET', '/registrations', registrationController.listRegistrations);
 router.on('POST', '/registrations', registrationController.createRegistration);
 router.on('POST', '/registrations/:id/cancel', registrationController.cancelRegistration);
 router.on('POST', '/registrations/:id/pay', registrationController.payInstallment);
+
+
+router.on('POST','/activities/:id/register',registrationController)
+router.on('GET','/stats/activities/',activityController.getStats)
 module.exports = router;

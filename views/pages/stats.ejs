@@ -1,0 +1,20 @@
+<%- include('../partials/header') %>
+
+
+    <ul>
+        <%stats.forEach((e)=>{%>
+            <li>
+                <%=e.nom%>
+            </li>
+            <li>
+                <%=e.capacity%>
+            </li>
+            <li>
+                <%=e.registrations%>
+            </li>
+            <li>
+                <%=e.fillRate%>
+            </li>
+            <%=})%>
+    </ul>
+    <%-include ('../partials/header')>
